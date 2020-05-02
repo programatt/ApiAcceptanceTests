@@ -13,7 +13,13 @@ namespace ApiAcceptanceTests
         private static readonly HttpClient Client = new HttpClient();
         public AcceptanceTests()
         {
-            var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().Get<AppSettings>();
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", EnvironmentVariableTarget.Process) ?? "";
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{env}.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build()
+                .Get<AppSettings>();
             Client.BaseAddress = new Uri(configuration.ApiUrl);
             Client.DefaultRequestHeaders.Add(
                 "X-Correlation-Id", configuration.XCorrelationId.ToString()
